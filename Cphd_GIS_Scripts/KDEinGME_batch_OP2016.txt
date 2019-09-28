@@ -1,0 +1,32 @@
+#KDE loop
+#Draft started 6 October 2016; functional 11 October 2016
+#Functional? - YES 
+
+#Must create a shapefile from the featureclass(arcpy.FeatureClassToShapefile_conversion(Input_Features, Output_Folder)
+
+#First part: Create kernels from ONE shapefile with IDs listed. Potential in the future to use list.vector for it to find all the different shapefiles in a folder and do it that way.NOTE: If the field name for the PIT IDs is PIT_ID and not "ID", will have to change "ID=" to "PIT_ID="
+
+ids <- c(4189,4196,4218,4247,4251,4270,4273,4275,4276,4279,7218,7225,7258,7263,7270); 
+
+for(i in 1:length(ids)){
+kde(in = "C:\GIS_Work\Cphd_Locations\Overton_2016\Overton_2016.shp", out=paste("C:\GIS_Work\Cphd_Locations\Overton_2016\","kde_",ids[i],".img"), bandwidth="PLUGIN", cellsize=1, where=paste("PIT_ID='",ids[i],"'"));}
+
+#Second part: Create Isopleth. Will create Isopleth and Polygon output files. 
+
+list.raster(in="C:\GIS_Work\Cphd_Locations\Overton_2016", match="kde_*", namevariable="rasters");
+
+#default variable name is rasterlist
+
+for(i in 1:length(rasterlist) & i in 1:length(rasters)){
+isopleth(in =rasterlist[i], out=paste("C:\GIS_Work\Cphd_Locations\Overton_2016\",rasters[i],"_isopleth.shp"), poly=paste("C:\GIS_Work\Cphd_Locations\Overton_2016\",rasters[i],"_isopleth_poly.shp"), quantiles = c(0.5, 0.95));}
+
+#Third part: merge all the polygon shapefiles into one for ease of reference
+
+list.vector(in="C:\GIS_Work\Cphd_Locations\Overton_2016", match="*isopleth_poly.shp");
+
+#default variable name is vectorlist
+
+for(i in 1:length(vectorlist)){
+copyfeaturedataset(in=vectorlist[i], out = "C:\GIS_Work\Cphd_Locations\Overton_2016\Overton_2016_kde_poly.shp");}
+
+##NOTE: The ID names will be lost; have to input by hand.And will have to calculate area 
